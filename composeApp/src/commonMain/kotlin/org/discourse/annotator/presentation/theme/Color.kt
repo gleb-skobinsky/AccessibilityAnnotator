@@ -1,4 +1,4 @@
-package presentation.theme
+package org.discourse.annotator.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

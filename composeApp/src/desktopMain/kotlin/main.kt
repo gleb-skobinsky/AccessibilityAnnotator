@@ -11,7 +11,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
-import presentation.theme.AnnotatorAppTheme
+import org.discourse.annotator.presentation.theme.AnnotatorAppTheme
 
 fun main() = application {
     Window(
@@ -19,31 +19,6 @@ fun main() = application {
         title = "AccessibilityAnnotator",
         state = WindowState(WindowPlacement.Maximized)
     ) {
-        AnnotatorAppTheme(false) {
-            TopAppBar(
-                title = { Text("Annotate") },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {}
-                    ) {
-                        Icon(Icons.Outlined.FolderOpen, "Open project")
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {}
-                    ) {
-                        Icon(Icons.Outlined.Done, "Save project")
-                    }
-                },
-                backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            )
-        }
+        App()
     }
-}
-
-@Preview
-@Composable
-fun AppDesktopPreview() {
-    App()
 }
