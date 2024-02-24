@@ -102,7 +102,7 @@ private fun AnnotatedParagraph(
                     modifier = Modifier.weight(1f)
                 )
             } else {
-                DragWrapper(textLayoutResult) {
+                DragWrapper(viewModel, textLayoutResult) {
                     ClickableText(
                         text = paragraphText,
                         style = MaterialTheme.typography.bodyLarge.copy(color = color),
