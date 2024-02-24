@@ -2,6 +2,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
@@ -13,6 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import org.discourse.annotator.common.uuid
+import org.discourse.annotator.domain.DiscourseEntity
+import org.discourse.annotator.domain.SelectionModalSteps
 import org.discourse.annotator.presentation.common.VerticalSpacer
 import org.discourse.annotator.presentation.components.MainViewModel
 import org.discourse.annotator.presentation.theme.AnnotatorAppTheme
@@ -24,9 +28,9 @@ val AnnotatorButtonColors
     )
 
 @Composable
-fun App() {
-    val viewModel = remember { MainViewModel() }
+fun App(viewModel: MainViewModel) {
     val selection by viewModel.selection.collectAsState()
+    val modal by viewModel.selectionModal.collectAsState()
     AnnotatorAppTheme(true) {
         Scaffold(
             topBar = {
@@ -55,7 +59,7 @@ fun App() {
                     contentType = { viewModel.paragraphs[it] }
                 ) { index ->
                     val paragraph = viewModel.paragraphs[index]
-                    val paragraphText = paragraph.asText()
+                    val paragraphText = paragraph.asText(selection, index)
                     var edited by rememberSaveable { mutableStateOf(false) }
                     var editableField by rememberSaveable { mutableStateOf(paragraphText.text) }
                     Column {
@@ -73,12 +77,18 @@ fun App() {
                                     modifier = Modifier.weight(1f)
                                 )
                             } else {
-                                Text(
+                                ClickableText(
                                     text = paragraphText,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = color,
-                                    modifier = Modifier.weight(1f)
-                                )
+                                    style = MaterialTheme.typography.bodyLarge.copy(color = color),
+                                    modifier = Modifier.weight(1f),
+                                    softWrap = true
+                                ) {
+                                    if (selection == null) {
+                                        viewModel.setSelection(index, it)
+                                    } else {
+                                        viewModel.updateSelection(it)
+                                    }
+                                }
                             }
                             if (edited) {
                                 VectorIconButton(Icons.Outlined.Done) {
@@ -87,6 +97,44 @@ fun App() {
                                 }
                             } else {
                                 VectorIconButton(Icons.Outlined.Edit) { edited = true }
+                            }
+                            modal?.let {
+                                DropdownMenu(
+                                    expanded = true,
+                                    onDismissRequest = {
+                                        viewModel.cancelSelection()
+                                    }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text(it.step.label) },
+                                        onClick = {},
+                                        enabled = false
+                                    )
+                                    when (it.step) {
+                                        is SelectionModalSteps.TypeSelection -> {
+                                            DropdownMenuItem(
+                                                text = { Text("Coreference") },
+                                                onClick = {
+                                                    viewModel.selectType(
+                                                        DiscourseEntity.Coreference(id = uuid())
+                                                    )
+                                                }
+                                            )
+                                            DropdownMenuItem(
+                                                text = { Text("Bridging") },
+                                                onClick = {
+                                                    viewModel.selectType(
+                                                        DiscourseEntity.Bridging(id = uuid())
+                                                    )
+                                                }
+                                            )
+                                        }
+
+                                        is SelectionModalSteps.SubtypeSelection -> {
+
+                                        }
+                                    }
+                                }
                             }
                         }
                         HorizontalDivider()

@@ -4,18 +4,19 @@ import androidx.compose.runtime.mutableStateListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.discourse.annotator.domain.AnnotationProject
-import org.discourse.annotator.domain.Paragraph
-import org.discourse.annotator.domain.Segment
-import org.discourse.annotator.domain.SelectionRange
+import org.discourse.annotator.domain.*
 import org.discourse.annotator.presentation.common.BaseViewModel
-import org.discourse.annotator.presentation.common.invoke
 
-class MainViewModel : BaseViewModel by BaseViewModel() {
+class MainViewModel : BaseViewModel() {
     val paragraphs = mutableStateListOf<Paragraph>()
 
     private val _selection = MutableStateFlow<SelectionRange?>(null)
     val selection = _selection.asStateFlow()
+
+    private val _selectionModal = MutableStateFlow<SelectionModal?>(null)
+    val selectionModal = _selectionModal.asStateFlow()
+
+    private var currentSegment: Segment? = null
 
     fun setSelection(paragraph: Int, char: Int) {
         _selection.value = SelectionRange(paragraph, char)
@@ -24,6 +25,29 @@ class MainViewModel : BaseViewModel by BaseViewModel() {
     fun updateSelection(endChar: Int) {
         _selection.update {
             it?.copy(endChar = endChar)
+        }
+        _selectionModal.value = SelectionModal()
+    }
+
+    fun cancelSelection() {
+        _selection.value = null
+    }
+
+    fun selectType(entity: DiscourseEntity) {
+        _selection.value?.let { curSelection ->
+            paragraphs.getOrNull(curSelection.paragraph)?.let { curParagraph ->
+                val start = curSelection.startChar ?: return
+                val end = curSelection.endChar ?: return
+                currentSegment = Segment(
+                    rawString = curParagraph.asText().text.substring(start, end),
+                    startInParagraph = start,
+                    endInParagraph = end,
+                    entity = entity
+                )
+                _selectionModal.update {
+                    it?.copy(step = SelectionModalSteps.SubtypeSelection())
+                }
+            }
         }
     }
 
@@ -36,7 +60,7 @@ class MainViewModel : BaseViewModel by BaseViewModel() {
     fun saveParagraph(index: Int, newText: String) {
         val oldParagraph = paragraphs.getOrNull(index)
         oldParagraph?.let {
-            val oldText = oldParagraph.asText().text
+            val oldText = oldParagraph.asText(index = index).text
             if (oldText == newText) return
             val newTextEnd = newText.getEnd()
             val oldTextEnd = oldText.getEnd()

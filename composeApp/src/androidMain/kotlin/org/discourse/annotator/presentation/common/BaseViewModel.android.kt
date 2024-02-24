@@ -7,12 +7,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-class AndroidBaseViewModelImpl : ViewModel(), BaseViewModel {
-    override val vmScope = viewModelScope
-    override fun vmLaunch(
+actual open class BaseViewModel actual constructor() : ViewModel() {
+    actual val vmScope: CoroutineScope = viewModelScope
+    actual fun vmLaunch(
         context: CoroutineContext,
         block: suspend CoroutineScope.() -> Unit
-    ): Job = vmScope.launch(context, block = block)
-}
+    ): Job = viewModelScope.launch(context = context, block = block)
 
-actual operator fun BaseViewModel.Companion.invoke(): BaseViewModel = AndroidBaseViewModelImpl()
+}

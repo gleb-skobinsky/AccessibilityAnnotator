@@ -4,17 +4,27 @@ import androidx.compose.ui.graphics.Color
 import kotlinx.serialization.Serializable
 import kotlin.math.absoluteValue
 
+enum class BridgingType {
+    Meronymy,
+    MetalinguisticAnaphora,
+    SetSubset,
+    EntityRole,
+    Unknown
+}
+
 @Serializable
 sealed interface DiscourseEntity {
     val id: String
 
     data class Coreference(
         override val id: String,
-        val accessibility: AccessibilityLevel
+        val accessibility: AccessibilityLevel = AccessibilityLevel.Unknown,
+        val referringType: ReferringType = ReferringType.Unknown
     ) : DiscourseEntity
 
     data class Bridging(
-        override val id: String
+        override val id: String,
+        val type: BridgingType = BridgingType.Unknown
     ) : DiscourseEntity
 }
 
