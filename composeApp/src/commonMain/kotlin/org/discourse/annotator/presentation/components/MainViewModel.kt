@@ -53,7 +53,6 @@ class MainViewModel : BaseViewModel() {
     }
 
 
-
     fun selectSubtype(referringType: ReferringType, accessibilityLevel: AccessibilityLevel) {
         val oldSegment = currentSegment
         currentSegment = oldSegment?.copy(
@@ -77,14 +76,19 @@ class MainViewModel : BaseViewModel() {
 
     private fun insertSegment() {
         _selectionModal.value = null
-        _selection.value?.let { curSelection ->
-            paragraphs.getOrNull(curSelection.paragraph)?.let { curParagraph ->
-                currentSegment?.let {
-                    curParagraph.acceptNewSegment(it)
-                }
+        withParagraph { curParagraph ->
+            currentSegment?.let {
+                curParagraph.acceptNewSegment(it)
             }
         }
+        currentSegment = null
         _selection.value = null
+    }
+
+    private fun withParagraph(block: (Paragraph) -> Unit) {
+        _selection.value?.let { curSelection ->
+            paragraphs.getOrNull(curSelection.paragraph)?.let(block)
+        }
     }
 
     fun toProject(): AnnotationProject = AnnotationProject(paragraphs = paragraphs)
@@ -127,6 +131,11 @@ class MainViewModel : BaseViewModel() {
                 }
             }
         }
+    }
+
+    fun findSegmentByIndex(paragraphIndex: Int, charIndex: Int): Segment? {
+        val paragraph = paragraphs.getOrNull(paragraphIndex)
+        return paragraph?.findSegmentByIndex(charIndex)
     }
 }
 

@@ -31,9 +31,16 @@ data class Paragraph(
 
     fun acceptNewSegment(segment: Segment) {
         for (seg in segments) {
-            val accepted = seg.acceptSegment(segment)
+            val accepted = seg.tryAcceptSegment(segment)
             if (accepted) break
         }
+    }
+
+    fun findSegmentByIndex(charIndex: Int): Segment? {
+        for (seg in segments) {
+            seg.traverseFind(charIndex)?.let { return it }
+        }
+        return null
     }
 }
 

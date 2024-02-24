@@ -25,16 +25,23 @@ data class Segment(
     }
 
     private fun AnnotatedString.Builder.addNested() {
-        if (nested.isEmpty()) {
-            addStyle(SpanStyle(background = entity.toColor()), startInParagraph, endInParagraph)
-        } else {
-            for (seg in nested) {
-                with(seg) { addNested() }
-            }
+        addStyle(SpanStyle(background = entity.toColor()), startInParagraph, endInParagraph)
+        for (seg in nested) {
+            with(seg) { addNested() }
         }
     }
 
-    fun acceptSegment(newSegment: Segment): Boolean {
+    fun tryAcceptSegment(newSegment: Segment): Boolean {
+        if (nested.isNotEmpty()) {
+            for (seg in nested) {
+                val accepted = seg.tryAcceptSegment(newSegment)
+                if (accepted) return true
+            }
+        }
+        return directlyAddSegment(newSegment)
+    }
+
+    private fun directlyAddSegment(newSegment: Segment): Boolean {
         when {
             startInParagraph < newSegment.startInParagraph && newSegment.endInParagraph < endInParagraph -> {
                 nested.add(newSegment)
@@ -51,10 +58,32 @@ data class Segment(
                 return true
             }
         }
-        for (seg in nested) {
-            val accepted = seg.acceptSegment(newSegment)
-            if (accepted) break; return true
-        }
         return false
+    }
+
+    fun traverseFind(charIndex: Int): Segment? {
+        if (charIndex in startInParagraph..endInParagraph) {
+            if (nested.isNotEmpty()) {
+                for (seg in nested) {
+                    seg.traverseFind(charIndex)?.let { return it }
+                }
+            }
+            return this
+        }
+        return null
+    }
+
+    override fun toString(): String {
+        return """
+            [
+                Segment:
+                    rawString: $rawString
+                    startInParagraph: $startInParagraph
+                    endInParagraph: $endInParagraph
+                    id: $id
+                    entity: $entity
+                    nested: $nested
+            ]
+        """.trimIndent()
     }
 }

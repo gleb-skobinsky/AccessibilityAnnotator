@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
@@ -85,7 +86,6 @@ private fun AnnotatedParagraph(
 ) {
     var editableField by rememberSaveable { mutableStateOf(paragraphText.text) }
     var edited by rememberSaveable { mutableStateOf(false) }
-    var textLayoutResult: TextLayoutResult? = remember { null }
 
     Column {
         Row(
@@ -102,23 +102,12 @@ private fun AnnotatedParagraph(
                     modifier = Modifier.weight(1f)
                 )
             } else {
-                DragWrapper(viewModel, textLayoutResult) {
-                    ClickableText(
-                        text = paragraphText,
-                        style = MaterialTheme.typography.bodyLarge.copy(color = color),
-                        onTextLayout = {
-                            textLayoutResult = it
-                        },
-                        softWrap = true,
-                    ) {
-                        if (paragraphText.isEmpty()) return@ClickableText
-                        if (selection == null) {
-                            viewModel.setSelection(index, it)
-                        } else {
-                            viewModel.updateSelection(it + 1)
-                        }
-                    }
-                }
+                DragClickableText(
+                    viewModel = viewModel,
+                    index = index,
+                    paragraphText = paragraphText,
+                    selection = selection
+                )
             }
             if (edited) {
                 VectorIconButton(Icons.Outlined.Done) {
@@ -190,6 +179,8 @@ private fun AnnotatedParagraph(
                                                 referringType = referringType,
                                                 accessibilityLevel = accessiblity
                                             )
+                                            referringType = ReferringType.Unknown
+                                            accessiblity = AccessibilityLevel.Unknown
                                         }
                                     }
                                 }
@@ -218,34 +209,63 @@ private fun AnnotatedParagraph(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RowScope.DragWrapper(
+fun RowScope.DragClickableText(
     viewModel: MainViewModel,
-    textLayoutResult: TextLayoutResult?,
-    content: @Composable BoxScope.() -> Unit
+    index: Int,
+    paragraphText: AnnotatedString,
+    selection: SelectionRange?
 ) {
-    var dragOffset: Offset? by remember { mutableStateOf(null) }
-    Box(
-        Modifier.weight(1f).onDrag(
-            onDragStart = { offset ->
-                dragOffset = offset
-                textLayoutResult
-                    ?.getOffsetForPosition(offset)
-                    ?.let { charOffset ->
-                        println(charOffset)
-                    }
-            },
-            onDragEnd = {
-                dragOffset = null
-            },
-            onDragCancel = {
-                dragOffset = null
-            },
-            onDrag = { offset ->
-                dragOffset = offset
+    var dragOffset: Offset by remember { mutableStateOf(Offset.Unspecified) }
+    var draggedSegment: Segment? by remember { mutableStateOf(null) }
+    var textLayoutResult: TextLayoutResult? = remember { null }
+    with(LocalDensity.current) {
+        Box(
+            Modifier.weight(1f).onDrag(
+                onDragStart = { offset ->
+                    dragOffset = offset
+                    textLayoutResult
+                        ?.getOffsetForPosition(offset)
+                        ?.let { charOffset ->
+                            draggedSegment = viewModel.findSegmentByIndex(index, charOffset)
+                        }
+                },
+                onDragEnd = {
+                    dragOffset = Offset.Unspecified
+                    draggedSegment = null
+                },
+                onDragCancel = {
+                    dragOffset = Offset.Unspecified
+                    draggedSegment = null
+                },
+                onDrag = { offset ->
+                    dragOffset += offset
+                }
+            )
+        ) {
+            ClickableText(
+                text = paragraphText,
+                style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onPrimaryContainer),
+                onTextLayout = {
+                    textLayoutResult = it
+                },
+                softWrap = true,
+            ) {
+                if (paragraphText.isEmpty()) return@ClickableText
+                if (selection == null) {
+                    viewModel.setSelection(index, it)
+                } else {
+                    viewModel.updateSelection(it + 1)
+                }
             }
-        )
-    ) {
-        content()
+            draggedSegment?.let { segment ->
+                if (dragOffset != Offset.Unspecified) {
+                    Text(
+                        text = segment.rawString,
+                        modifier = Modifier.offset(dragOffset.x.toDp(), dragOffset.y.toDp())
+                    )
+                }
+            }
+        }
     }
 }
 
