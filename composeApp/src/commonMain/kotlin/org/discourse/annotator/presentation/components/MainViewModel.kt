@@ -31,6 +31,7 @@ class MainViewModel : BaseViewModel() {
 
     fun cancelSelection() {
         _selection.value = null
+        _selectionModal.value = null
     }
 
     fun selectType(entity: DiscourseEntity) {
@@ -45,10 +46,45 @@ class MainViewModel : BaseViewModel() {
                     entity = entity
                 )
                 _selectionModal.update {
-                    it?.copy(step = SelectionModalSteps.SubtypeSelection())
+                    it?.copy(step = SelectionModalSteps.SubtypeSelection(parentType = entity))
                 }
             }
         }
+    }
+
+
+
+    fun selectSubtype(referringType: ReferringType, accessibilityLevel: AccessibilityLevel) {
+        val oldSegment = currentSegment
+        currentSegment = oldSegment?.copy(
+            entity = (oldSegment.entity as? DiscourseEntity.Coreference)?.copy(
+                referringType = referringType,
+                accessibility = accessibilityLevel
+            )
+        )
+        insertSegment()
+    }
+
+    fun selectSubtype(bridgingType: BridgingType) {
+        val oldSegment = currentSegment
+        currentSegment = oldSegment?.copy(
+            entity = (oldSegment.entity as? DiscourseEntity.Bridging)?.copy(
+                type = bridgingType
+            )
+        )
+        insertSegment()
+    }
+
+    private fun insertSegment() {
+        _selectionModal.value = null
+        _selection.value?.let { curSelection ->
+            paragraphs.getOrNull(curSelection.paragraph)?.let { curParagraph ->
+                currentSegment?.let {
+                    curParagraph.acceptNewSegment(it)
+                }
+            }
+        }
+        _selection.value = null
     }
 
     fun toProject(): AnnotationProject = AnnotationProject(paragraphs = paragraphs)
@@ -73,7 +109,7 @@ class MainViewModel : BaseViewModel() {
                     )
                 }
 
-                oldText > newText -> {
+                else -> {
                     oldParagraph.segments
                         .withIndex()
                         .firstOrNull { newTextEnd in it.value.startInParagraph..it.value.endInParagraph }
@@ -89,8 +125,6 @@ class MainViewModel : BaseViewModel() {
                             paragraphs[index] = oldParagraph.copy(segments = newSegments)
                         }
                 }
-
-                else -> Unit
             }
         }
     }

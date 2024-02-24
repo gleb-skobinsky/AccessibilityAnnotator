@@ -28,9 +28,9 @@ sealed interface DiscourseEntity {
     ) : DiscourseEntity
 }
 
-private val noEntityColor = Color.Gray.copy(alpha = 0.3f)
+val noEntityColor = Color.Gray.copy(alpha = 0.3f)
 
-private fun String.toColor(saturation: Float = 0.5f, lightness: Float = 0.8f): Color {
+private fun String.toColor(saturation: Float = 0.5f, lightness: Float = 0.5f): Color {
     val hue = fold(0) { acc, char -> char.code + acc * 37 } % 360
     return Color.hsl(hue.absoluteValue.toFloat(), saturation, lightness)
 }

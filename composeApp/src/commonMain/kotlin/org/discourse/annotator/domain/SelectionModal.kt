@@ -7,11 +7,10 @@ sealed interface SelectionModalSteps {
         override val label: String = "Select entity type",
         val selectedType: DiscourseEntity? = null
     ) : SelectionModalSteps
+
     data class SubtypeSelection(
         override val label: String = "Select entity subtype",
-        val bridgingType: BridgingType = BridgingType.Unknown,
-        val referringType: ReferringType = ReferringType.Unknown,
-        val accessibilityLevel: AccessibilityLevel = AccessibilityLevel.Unknown
+        val parentType: DiscourseEntity
     ) : SelectionModalSteps
 }
 

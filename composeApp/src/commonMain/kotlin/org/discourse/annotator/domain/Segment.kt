@@ -2,7 +2,6 @@ package org.discourse.annotator.domain
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.serialization.Serializable
 import org.discourse.annotator.common.uuid
 
@@ -14,19 +13,48 @@ data class Segment(
     val endInParagraph: Int,
     val id: String = uuid(),
     val entity: DiscourseEntity? = null,
-    val words: List<String> = emptyList(),
-    val nested: List<Segment> = emptyList()
+    val nested: MutableList<Segment> = mutableListOf()
 ) {
-    fun getAnnotated(): AnnotatedString = buildAnnotatedString {
+    val words: List<String> = rawString.split(" ")
+
+    fun AnnotatedString.Builder.appendAnnotated() {
+        pushStyle(SpanStyle(background = noEntityColor))
+        append(rawString)
+        addNested()
+        pop()
+    }
+
+    private fun AnnotatedString.Builder.addNested() {
         if (nested.isEmpty()) {
-            pushStyle(SpanStyle(background = entity.toColor()))
-            append(rawString.trim())
-            pop()
-            append(" ")
+            addStyle(SpanStyle(background = entity.toColor()), startInParagraph, endInParagraph)
         } else {
             for (seg in nested) {
-                append(seg.getAnnotated())
+                with(seg) { addNested() }
             }
         }
+    }
+
+    fun acceptSegment(newSegment: Segment): Boolean {
+        when {
+            startInParagraph < newSegment.startInParagraph && newSegment.endInParagraph < endInParagraph -> {
+                nested.add(newSegment)
+                return true
+            }
+
+            startInParagraph == newSegment.startInParagraph && newSegment.endInParagraph < endInParagraph -> {
+                nested.add(newSegment)
+                return true
+            }
+
+            startInParagraph < newSegment.startInParagraph && newSegment.endInParagraph == endInParagraph -> {
+                nested.add(newSegment)
+                return true
+            }
+        }
+        for (seg in nested) {
+            val accepted = seg.acceptSegment(newSegment)
+            if (accepted) break; return true
+        }
+        return false
     }
 }

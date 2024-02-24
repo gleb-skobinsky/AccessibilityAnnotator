@@ -13,18 +13,26 @@ data class Paragraph(
 ) {
     fun asText(selection: SelectionRange? = null, index: Int = 0) = buildAnnotatedString {
         for (segment in segments) {
-            append(segment.getAnnotated())
+            with(segment) {
+                appendAnnotated()
+            }
         }
         selection?.let {
+            if (it.isEmpty() && it.paragraph != index) return@buildAnnotatedString
             val start = selection.startChar
             val end = selection.endChar
-            if (!it.isEmpty() && it.paragraph == index) {
-                when {
-                    start != null && end == null -> addStyle(selectionStyle, start, minOf(start + 1, length))
-                    start != null && end != null -> addStyle(selectionStyle, start, end)
-                    start == null && end == null -> Unit
-                }
+            when {
+                start != null && end == null -> addStyle(selectionStyle, start, minOf(start + 1, length))
+                start != null && end != null -> addStyle(selectionStyle, start, end)
+                start == null && end == null -> Unit
             }
+        }
+    }
+
+    fun acceptNewSegment(segment: Segment) {
+        for (seg in segments) {
+            val accepted = seg.acceptSegment(segment)
+            if (accepted) break
         }
     }
 }
