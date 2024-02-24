@@ -36,9 +36,9 @@ class MainViewModel : BaseViewModel() {
 
     fun selectType(entity: DiscourseEntity) {
         _selection.value?.let { curSelection ->
-            paragraphs.getOrNull(curSelection.paragraph)?.let { curParagraph ->
-                val start = curSelection.startChar ?: return
-                val end = curSelection.endChar ?: return
+            withParagraph(curSelection.paragraph) { curParagraph ->
+                val start = curSelection.startChar ?: return@withParagraph
+                val end = curSelection.endChar ?: return@withParagraph
                 currentSegment = Segment(
                     rawString = curParagraph.asText().text.substring(start, end),
                     startInParagraph = start,
@@ -85,10 +85,8 @@ class MainViewModel : BaseViewModel() {
         _selection.value = null
     }
 
-    private fun withParagraph(block: (Paragraph) -> Unit) {
-        _selection.value?.let { curSelection ->
-            paragraphs.getOrNull(curSelection.paragraph)?.let(block)
-        }
+    private fun withParagraph(paragraph: Int = _selection.value?.paragraph ?: 0, block: (Paragraph) -> Unit) {
+        paragraphs.getOrNull(paragraph)?.let(block)
     }
 
     fun toProject(): AnnotationProject = AnnotationProject(paragraphs = paragraphs)
@@ -98,10 +96,9 @@ class MainViewModel : BaseViewModel() {
     }
 
     fun saveParagraph(index: Int, newText: String) {
-        val oldParagraph = paragraphs.getOrNull(index)
-        oldParagraph?.let {
+        withParagraph(index) { oldParagraph ->
             val oldText = oldParagraph.asText(index = index).text
-            if (oldText == newText) return
+            if (oldText == newText) return@withParagraph
             val newTextEnd = newText.getEnd()
             val oldTextEnd = oldText.getEnd()
             when {
@@ -109,7 +106,7 @@ class MainViewModel : BaseViewModel() {
                     val oldSegments = oldParagraph.segments
                     val textDiff = newText.substring(oldTextEnd)
                     paragraphs[index] = oldParagraph.copy(
-                        segments = oldSegments + Segment(textDiff, oldTextEnd, newTextEnd)
+                        segments = (oldSegments + Segment(textDiff, oldTextEnd, newTextEnd)).toMutableList()
                     )
                 }
 
@@ -126,7 +123,7 @@ class MainViewModel : BaseViewModel() {
                                 )
                             )
                             val newSegments = oldParagraph.segments.subList(0, segmentIndex) + newSegment
-                            paragraphs[index] = oldParagraph.copy(segments = newSegments)
+                            paragraphs[index] = oldParagraph.copy(segments = newSegments.toMutableList())
                         }
                 }
             }
@@ -136,6 +133,12 @@ class MainViewModel : BaseViewModel() {
     fun findSegmentByIndex(paragraphIndex: Int, charIndex: Int): Segment? {
         val paragraph = paragraphs.getOrNull(paragraphIndex)
         return paragraph?.findSegmentByIndex(charIndex)
+    }
+
+    fun combineSegmentsIntoChain(paragraph: Int, segment1: Segment, segment2: Segment) {
+        withParagraph(paragraph) {
+
+        }
     }
 }
 

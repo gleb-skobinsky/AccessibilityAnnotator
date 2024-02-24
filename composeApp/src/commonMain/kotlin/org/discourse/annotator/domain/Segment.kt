@@ -41,6 +41,18 @@ data class Segment(
         return directlyAddSegment(newSegment)
     }
 
+    fun overWriteEntityId(segment: Segment, entityId: String): Boolean {
+        if (nested.isNotEmpty()) {
+            val targetIndex = nested.indexOf(segment)
+            if (targetIndex != -1) {
+                val oldEntity = segment.entity
+                nested[targetIndex] = segment.copy(entity = oldEntity?.copyId(id = entityId))
+                return true
+            }
+        }
+        return false
+    }
+
     private fun directlyAddSegment(newSegment: Segment): Boolean {
         when {
             startInParagraph < newSegment.startInParagraph && newSegment.endInParagraph < endInParagraph -> {

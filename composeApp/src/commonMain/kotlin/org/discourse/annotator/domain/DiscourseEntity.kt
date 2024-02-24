@@ -26,6 +26,13 @@ sealed interface DiscourseEntity {
         override val id: String,
         val type: BridgingType = BridgingType.Unknown
     ) : DiscourseEntity
+
+    fun copyId(id: String): DiscourseEntity {
+        return when (this) {
+            is Coreference -> copy(id = id)
+            is Bridging -> copy(id = id)
+        }
+    }
 }
 
 val noEntityColor = Color.Gray.copy(alpha = 0.3f)

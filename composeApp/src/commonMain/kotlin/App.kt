@@ -230,8 +230,16 @@ fun RowScope.DragClickableText(
                         }
                 },
                 onDragEnd = {
+                    val savedOffset = dragOffset
                     dragOffset = Offset.Unspecified
                     draggedSegment = null
+                    textLayoutResult
+                        ?.getOffsetForPosition(savedOffset)
+                        ?.let { charOffset ->
+                            val segmentUnderDrag = viewModel.findSegmentByIndex(index, charOffset)
+
+                        }
+
                 },
                 onDragCancel = {
                     dragOffset = Offset.Unspecified
