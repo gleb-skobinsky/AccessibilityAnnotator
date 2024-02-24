@@ -1,27 +1,65 @@
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.onDrag
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.ImportExport
+import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import org.discourse.annotator.common.uuid
-import org.discourse.annotator.domain.*
+import org.discourse.annotator.domain.AccessibilityLevel
+import org.discourse.annotator.domain.BridgingType
+import org.discourse.annotator.domain.DiscourseEntity
+import org.discourse.annotator.domain.ReferringType
+import org.discourse.annotator.domain.Segment
+import org.discourse.annotator.domain.SelectionModal
+import org.discourse.annotator.domain.SelectionModalSteps
+import org.discourse.annotator.domain.SelectionRange
 import org.discourse.annotator.presentation.common.VerticalSpacer
 import org.discourse.annotator.presentation.components.MainViewModel
 import org.discourse.annotator.presentation.theme.AnnotatorAppTheme
@@ -104,7 +142,7 @@ private fun AnnotatedParagraph(
             } else {
                 DragClickableText(
                     viewModel = viewModel,
-                    index = index,
+                    paragraphIndex = index,
                     paragraphText = paragraphText,
                     selection = selection
                 )
@@ -116,6 +154,9 @@ private fun AnnotatedParagraph(
                 }
             } else {
                 VectorIconButton(Icons.Outlined.Edit) { edited = true }
+            }
+            VectorIconButton(Icons.Filled.Delete) {
+                viewModel.deleteParagraph(index)
             }
             modal?.let {
                 DropdownMenu(
@@ -207,11 +248,10 @@ private fun AnnotatedParagraph(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RowScope.DragClickableText(
     viewModel: MainViewModel,
-    index: Int,
+    paragraphIndex: Int,
     paragraphText: AnnotatedString,
     selection: SelectionRange?
 ) {
@@ -219,36 +259,51 @@ fun RowScope.DragClickableText(
     var draggedSegment: Segment? by remember { mutableStateOf(null) }
     var textLayoutResult: TextLayoutResult? = remember { null }
     with(LocalDensity.current) {
-        Box(
-            Modifier.weight(1f).onDrag(
-                onDragStart = { offset ->
-                    dragOffset = offset
+        val onEnd = {
+            draggedSegment?.let { dragged ->
+                if (dragOffset.x < 0 && 0f < dragOffset.y && dragOffset.y < 24.dp.toPx()) {
+                    viewModel.deleteSegment(dragged, paragraphIndex)
+                } else {
                     textLayoutResult
-                        ?.getOffsetForPosition(offset)
+                        ?.getOffsetForPosition(dragOffset)
                         ?.let { charOffset ->
-                            draggedSegment = viewModel.findSegmentByIndex(index, charOffset)
+                            viewModel.findSegmentByIndex(paragraphIndex, charOffset)?.let {
+                                viewModel.combineSegmentsIntoChain(paragraphIndex, dragged, it)
+                            }
                         }
-                },
-                onDragEnd = {
-                    val savedOffset = dragOffset
-                    dragOffset = Offset.Unspecified
-                    draggedSegment = null
-                    textLayoutResult
-                        ?.getOffsetForPosition(savedOffset)
-                        ?.let { charOffset ->
-                            val segmentUnderDrag = viewModel.findSegmentByIndex(index, charOffset)
-
-                        }
-
-                },
-                onDragCancel = {
-                    dragOffset = Offset.Unspecified
-                    draggedSegment = null
-                },
-                onDrag = { offset ->
-                    dragOffset += offset
                 }
-            )
+            }
+            dragOffset = Offset.Unspecified
+            draggedSegment = null
+        }
+        Icon(
+            imageVector = Icons.Outlined.Close,
+            contentDescription = "Span deletion area",
+            modifier = Modifier.padding(end = 16.dp).size(24.dp)
+        )
+        Box(
+            Modifier.weight(1f)
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            dragOffset = offset
+                            textLayoutResult
+                                ?.getOffsetForPosition(offset)
+                                ?.let { charOffset ->
+                                    draggedSegment = viewModel.findSegmentByIndex(paragraphIndex, charOffset)
+                                }
+                        },
+                        onDrag = { _, offset ->
+                            dragOffset += offset
+                        },
+                        onDragCancel = {
+                            onEnd()
+                        },
+                        onDragEnd = {
+                            onEnd()
+                        }
+                    )
+                }
         ) {
             ClickableText(
                 text = paragraphText,
@@ -260,7 +315,7 @@ fun RowScope.DragClickableText(
             ) {
                 if (paragraphText.isEmpty()) return@ClickableText
                 if (selection == null) {
-                    viewModel.setSelection(index, it)
+                    viewModel.setSelection(paragraphIndex, it)
                 } else {
                     viewModel.updateSelection(it + 1)
                 }

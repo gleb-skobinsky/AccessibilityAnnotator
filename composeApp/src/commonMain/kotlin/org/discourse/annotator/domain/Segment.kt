@@ -41,13 +41,17 @@ data class Segment(
         return directlyAddSegment(newSegment)
     }
 
-    fun overWriteEntityId(segment: Segment, entityId: String): Boolean {
-        if (nested.isNotEmpty()) {
-            val targetIndex = nested.indexOf(segment)
-            if (targetIndex != -1) {
-                val oldEntity = segment.entity
-                nested[targetIndex] = segment.copy(entity = oldEntity?.copyId(id = entityId))
-                return true
+    fun replaceEntityId(segment: Segment): Boolean {
+        val targetIdx = nested.indexOfFirst { it.id == segment.id }
+        if (targetIdx != -1) {
+            nested[targetIdx] = segment
+            return true
+        } else {
+            if (nested.isNotEmpty()) {
+                for (seg in nested) {
+                    val replaced = seg.replaceEntityId(segment)
+                    if (replaced) return true
+                }
             }
         }
         return false
@@ -97,5 +101,19 @@ data class Segment(
                     nested: $nested
             ]
         """.trimIndent()
+    }
+
+    fun deleteSubSegment(segment: Segment): Boolean {
+        val idx = nested.indexOfFirst { it.id == segment.id }
+        if (idx != -1) {
+            nested.removeAt(idx)
+            return true
+        } else {
+            for (seg in nested) {
+                val deleted = seg.deleteSubSegment(segment)
+                if (deleted) return true
+            }
+        }
+        return false
     }
 }

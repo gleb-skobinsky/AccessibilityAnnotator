@@ -22,7 +22,12 @@ data class Paragraph(
             val start = selection.startChar
             val end = selection.endChar
             when {
-                start != null && end == null -> addStyle(selectionStyle, start, minOf(start + 1, length))
+                start != null && end == null -> addStyle(
+                    selectionStyle,
+                    start,
+                    minOf(start + 1, length)
+                )
+
                 start != null && end != null -> addStyle(selectionStyle, start, end)
                 start == null && end == null -> Unit
             }
@@ -43,24 +48,31 @@ data class Paragraph(
         return null
     }
 
-    private fun sendEntityIdToSegment(segment: Segment, entityId: String) {
-        val target = segments.indexOf(segment)
-        if (target != 1) {
-            val oldEntity = segment.entity
-            segments[target] = segment.copy(entity = oldEntity?.copyId(id = entityId))
-        } else {
-            for (seg in segments) {
-                val accepted = seg.overWriteEntityId(segment, entityId)
-                if (accepted) break; return
+    fun combineTwoSegments(segment1: Segment, segment2: Segment) {
+        val (forcing, forced) = listOf(segment1, segment2).sortedBy { it.startInParagraph }
+        val forcingId = forcing.entity?.id
+        forcingId?.let { entityId ->
+            val newForced = forced.copy(entity = forced.entity?.copyId(id = entityId))
+            val targetIdx = segments.indexOfFirst { it.id == newForced.id }
+            if (targetIdx != -1) {
+                segments[targetIdx] = newForced
+            } else {
+                for (seg in segments) {
+                    val accepted = seg.replaceEntityId(newForced)
+                    if (accepted) break
+                }
             }
         }
     }
 
-    fun combineTwoSegments(segment1: Segment, segment2: Segment) {
-        val (forcing, forced) = listOf(segment1, segment2).sortedBy { it.startInParagraph }
-        val forcingId = forcing.entity?.id
-        forcingId?.let {
-            sendEntityIdToSegment(forced, forcingId)
+    fun deleteSegment(segment: Segment) {
+        val idx = segments.indexOfFirst { it.id == segment.id }
+        if (idx != -1) {
+            segments.removeAt(idx)
+        } else {
+            for (seg in segments) {
+                seg.deleteSubSegment(segment)
+            }
         }
     }
 }

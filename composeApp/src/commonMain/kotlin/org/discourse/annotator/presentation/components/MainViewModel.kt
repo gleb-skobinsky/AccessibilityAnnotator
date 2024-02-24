@@ -4,7 +4,17 @@ import androidx.compose.runtime.mutableStateListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.discourse.annotator.domain.*
+import org.discourse.annotator.common.uuid
+import org.discourse.annotator.domain.AccessibilityLevel
+import org.discourse.annotator.domain.AnnotationProject
+import org.discourse.annotator.domain.BridgingType
+import org.discourse.annotator.domain.DiscourseEntity
+import org.discourse.annotator.domain.Paragraph
+import org.discourse.annotator.domain.ReferringType
+import org.discourse.annotator.domain.Segment
+import org.discourse.annotator.domain.SelectionModal
+import org.discourse.annotator.domain.SelectionModalSteps
+import org.discourse.annotator.domain.SelectionRange
 import org.discourse.annotator.presentation.common.BaseViewModel
 
 class MainViewModel : BaseViewModel() {
@@ -85,7 +95,10 @@ class MainViewModel : BaseViewModel() {
         _selection.value = null
     }
 
-    private fun withParagraph(paragraph: Int = _selection.value?.paragraph ?: 0, block: (Paragraph) -> Unit) {
+    private fun withParagraph(
+        paragraph: Int = _selection.value?.paragraph ?: 0,
+        block: (Paragraph) -> Unit
+    ) {
         paragraphs.getOrNull(paragraph)?.let(block)
     }
 
@@ -106,7 +119,11 @@ class MainViewModel : BaseViewModel() {
                     val oldSegments = oldParagraph.segments
                     val textDiff = newText.substring(oldTextEnd)
                     paragraphs[index] = oldParagraph.copy(
-                        segments = (oldSegments + Segment(textDiff, oldTextEnd, newTextEnd)).toMutableList()
+                        segments = (oldSegments + Segment(
+                            textDiff,
+                            oldTextEnd,
+                            newTextEnd
+                        )).toMutableList()
                     )
                 }
 
@@ -115,15 +132,18 @@ class MainViewModel : BaseViewModel() {
                         .withIndex()
                         .firstOrNull { newTextEnd in it.value.startInParagraph..it.value.endInParagraph }
                         ?.let { (segmentIndex, lastSurvivedFragment) ->
-                            val lastCharInLastSegment = newTextEnd - lastSurvivedFragment.startInParagraph
+                            val lastCharInLastSegment =
+                                newTextEnd - lastSurvivedFragment.startInParagraph
                             val newSegment = lastSurvivedFragment.copy(
                                 rawString = lastSurvivedFragment.rawString.substring(
                                     startIndex = 0,
                                     endIndex = lastCharInLastSegment
                                 )
                             )
-                            val newSegments = oldParagraph.segments.subList(0, segmentIndex) + newSegment
-                            paragraphs[index] = oldParagraph.copy(segments = newSegments.toMutableList())
+                            val newSegments =
+                                oldParagraph.segments.subList(0, segmentIndex) + newSegment
+                            paragraphs[index] =
+                                oldParagraph.copy(segments = newSegments.toMutableList())
                         }
                 }
             }
@@ -136,9 +156,21 @@ class MainViewModel : BaseViewModel() {
     }
 
     fun combineSegmentsIntoChain(paragraph: Int, segment1: Segment, segment2: Segment) {
-        withParagraph(paragraph) {
-
+        withParagraph(paragraph) { par ->
+            par.combineTwoSegments(segment1, segment2)
+            paragraphs[paragraph] = par.copy(id = uuid())
         }
+    }
+
+    fun deleteSegment(segment: Segment, paragraph: Int) {
+        withParagraph(paragraph) { par ->
+            par.deleteSegment(segment)
+            paragraphs[paragraph] = par.copy(id = uuid())
+        }
+    }
+
+    fun deleteParagraph(atIndex: Int) {
+        paragraphs.removeAt(atIndex)
     }
 }
 
