@@ -183,7 +183,7 @@ fun AnnotatedParagraph(
                                 when (step.parentType) {
                                     is DiscourseEntity.Coreference -> {
                                         var referringType by remember { mutableStateOf(ReferringType.Unknown) }
-                                        var accessiblity by remember {
+                                        var accessibility by remember {
                                             mutableStateOf(
                                                 AccessibilityLevel.Unknown
                                             )
@@ -198,27 +198,27 @@ fun AnnotatedParagraph(
                                                 }
                                             )
                                         }
-                                        DropdownHeader("Select accessiblity level")
+                                        DropdownHeader("Select accessibility level")
                                         for (acc in AccessibilityLevel.entries) {
                                             if (acc == AccessibilityLevel.Unknown) continue
                                             DropdownMenuItem(
                                                 text = { Text(acc.name) },
                                                 onClick = {
-                                                    accessiblity = acc
+                                                    accessibility = acc
                                                 }
                                             )
                                         }
-                                        LaunchedEffect(referringType, accessiblity) {
+                                        LaunchedEffect(referringType, accessibility) {
                                             if (
                                                 referringType != ReferringType.Unknown
-                                                && accessiblity != AccessibilityLevel.Unknown
+                                                && accessibility != AccessibilityLevel.Unknown
                                             ) {
                                                 viewModel.selectSubtype(
                                                     referringType = referringType,
-                                                    accessibilityLevel = accessiblity
+                                                    accessibilityLevel = accessibility
                                                 )
                                                 referringType = ReferringType.Unknown
-                                                accessiblity = AccessibilityLevel.Unknown
+                                                accessibility = AccessibilityLevel.Unknown
                                             }
                                         }
                                     }
