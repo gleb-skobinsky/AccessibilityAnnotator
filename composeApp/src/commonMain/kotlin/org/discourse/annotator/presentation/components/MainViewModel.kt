@@ -113,10 +113,11 @@ class MainViewModel : BaseViewModel() {
             withParagraph(curSelection.paragraph) { curParagraph ->
                 val start = curSelection.startChar ?: return@withParagraph
                 val end = curSelection.endChar ?: return@withParagraph
+                val (actualStart, actualEnd) = listOf(start, end).sorted()
                 currentSegment = Segment(
-                    rawString = curParagraph.asText().text.substring(start, end),
-                    startInParagraph = start,
-                    endInParagraph = end,
+                    rawString = curParagraph.asText().text.substring(actualStart, actualEnd),
+                    startInParagraph = actualStart,
+                    endInParagraph = actualEnd,
                     entity = entity
                 )
                 _selectionModal.update {

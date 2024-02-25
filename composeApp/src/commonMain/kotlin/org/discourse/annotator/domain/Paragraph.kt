@@ -29,7 +29,8 @@ data class Paragraph(
                 )
 
                 start != null && end != null -> {
-                    if (end >= start) addStyle(selectionStyle, start, end)
+                    val (actualStart, actualEnd) = listOf(start, end).sorted()
+                    addStyle(selectionStyle, actualStart, actualEnd)
                 }
 
                 start == null && end == null -> Unit
