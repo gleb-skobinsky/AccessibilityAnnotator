@@ -6,10 +6,13 @@ import kotlin.math.absoluteValue
 
 @Serializable
 enum class BridgingType {
-    Meronymy,
+    MeronymyOrHolonymy,
+    HyponymyAndHyperonymy,
+    CoHyponymy,
     MetalinguisticAnaphora,
-    SetSubset,
     EntityRole,
+    EventTime,
+    SameSemanticField,
     Unknown
 }
 
