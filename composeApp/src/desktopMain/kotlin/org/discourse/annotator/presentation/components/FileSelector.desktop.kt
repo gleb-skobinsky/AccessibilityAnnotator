@@ -7,8 +7,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
-import org.discourse.annotator.domain.AnnotationProject
 import org.discourse.annotator.common.json.baseJson
+import org.discourse.annotator.domain.AnnotationProject
 import java.awt.FileDialog
 import java.io.File
 import java.nio.file.Paths
@@ -18,6 +18,7 @@ import kotlin.io.path.pathString
 actual fun FileSelector(
     isOpen: Boolean,
     onOpen: () -> Unit,
+    onNewPath: (String) -> Unit,
     onTextRead: (String) -> Unit
 ) {
     LaunchedEffect(isOpen) {
@@ -28,7 +29,9 @@ actual fun FileSelector(
             fDialog.file?.let { file ->
                 fDialog.directory?.let { directory ->
                     launch(Dispatchers.IO) {
-                        val inStream = Paths.get(directory, file).toFile().inputStream()
+                        val path = Paths.get(directory, file)
+                        onNewPath(path.pathString)
+                        val inStream = path.toFile().inputStream()
                         val text = inStream.readBytes().toString(Charsets.UTF_8)
                         inStream.close()
                         onTextRead(text)
@@ -47,9 +50,12 @@ actual fun FileSaver(
     onNewPath: (String) -> Unit,
     project: AnnotationProject
 ) {
-    LaunchedEffect(isOpen, predefinedPath) {
+    LaunchedEffect(isOpen) {
         predefinedPath?.let {
-            File(it).writeText(baseJson.encodeToString<AnnotationProject>(project))
+            withContext(Dispatchers.IO) {
+                File(it).writeText(baseJson.encodeToString<AnnotationProject>(project))
+            }
+            onOpen()
         } ?: run {
             if (isOpen) {
                 onOpen()
@@ -60,7 +66,10 @@ actual fun FileSaver(
                         withContext(Dispatchers.IO) {
                             val path = Paths.get(directory, file)
                             onNewPath(path.pathString)
-                            val textToWrite = baseJson.encodeToString(AnnotationProject.serializer(), project.copy(filePath = path.pathString))
+                            val textToWrite = baseJson.encodeToString(
+                                AnnotationProject.serializer(),
+                                project
+                            )
                             path.toFile().writeText(textToWrite)
                         }
                     }

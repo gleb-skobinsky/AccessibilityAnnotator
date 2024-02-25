@@ -94,10 +94,6 @@ class MainViewModel : BaseViewModel() {
             try {
                 val project = baseJson.decodeFromString(AnnotationProject.serializer(), content)
                 paragraphs.clear()
-                _projectSaverData.update {
-                    val fp = project.filePath
-                    it.copy(filePath = fp)
-                }
                 paragraphs.addAll(project.paragraphs)
             } catch (e: SerializationException) {
                 println("Failed to read project")
@@ -177,8 +173,7 @@ class MainViewModel : BaseViewModel() {
     }
 
     fun toProject(): AnnotationProject = AnnotationProject(
-        paragraphs = paragraphs,
-        filePath = _projectSaverData.value.filePath
+        paragraphs = paragraphs
     )
 
     fun addParagraph() {

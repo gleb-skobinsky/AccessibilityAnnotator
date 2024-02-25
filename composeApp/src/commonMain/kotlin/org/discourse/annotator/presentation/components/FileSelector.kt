@@ -9,6 +9,7 @@ import org.discourse.annotator.domain.AnnotationProject
 expect fun FileSelector(
     isOpen: Boolean,
     onOpen: () -> Unit,
+    onNewPath: (String) -> Unit = {},
     onTextRead: (String) -> Unit
 )
 
@@ -24,7 +25,10 @@ expect fun FileSaver(
 @Composable
 fun RawTextFileSelector(viewModel: MainViewModel) {
     val isOpen by viewModel.rawTextSelectorOpen.collectAsState()
-    FileSelector(isOpen, { viewModel.closeRawTextSelector() }) {
+    FileSelector(
+        isOpen = isOpen,
+        onOpen = { viewModel.closeRawTextSelector() }
+    ) {
         viewModel.acceptParagraphs(it)
     }
 }
@@ -32,7 +36,11 @@ fun RawTextFileSelector(viewModel: MainViewModel) {
 @Composable
 fun ProjectFileSelector(viewModel: MainViewModel) {
     val isOpen by viewModel.projectSelectorOpen.collectAsState()
-    FileSelector(isOpen, { viewModel.closeProjectSelector() }) {
+    FileSelector(
+        isOpen = isOpen,
+        onOpen = { viewModel.closeProjectSelector() },
+        onNewPath = { viewModel.receiveNewProjectPath(it) }
+    ) {
         viewModel.acceptProject(it)
     }
 }
