@@ -56,6 +56,10 @@ class MainViewModel : BaseViewModel() {
         _projectSaverData.update { it.copy(isOpen = true) }
     }
 
+    fun receiveNewProjectPath(path: String) {
+        _projectSaverData.update { it.copy(filePath = path) }
+    }
+
     fun closeProjectSaver() {
         _projectSaverData.update { it.copy(isOpen = false) }
     }
@@ -90,7 +94,10 @@ class MainViewModel : BaseViewModel() {
             try {
                 val project = baseJson.decodeFromString(AnnotationProject.serializer(), content)
                 paragraphs.clear()
-                _projectSaverData.update { it.copy(filePath = project.filePath) }
+                _projectSaverData.update {
+                    val fp = project.filePath
+                    it.copy(filePath = fp)
+                }
                 paragraphs.addAll(project.paragraphs)
             } catch (e: SerializationException) {
                 println("Failed to read project")
@@ -169,7 +176,10 @@ class MainViewModel : BaseViewModel() {
         paragraphs.getOrNull(paragraph)?.let(block)
     }
 
-    fun toProject(): AnnotationProject = AnnotationProject(paragraphs = paragraphs)
+    fun toProject(): AnnotationProject = AnnotationProject(
+        paragraphs = paragraphs,
+        filePath = _projectSaverData.value.filePath
+    )
 
     fun addParagraph() {
         paragraphs.add(Paragraph())

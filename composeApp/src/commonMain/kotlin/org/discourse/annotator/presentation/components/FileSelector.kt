@@ -17,6 +17,7 @@ expect fun FileSaver(
     isOpen: Boolean,
     predefinedPath: String?,
     onOpen: () -> Unit,
+    onNewPath: (String) -> Unit,
     project: AnnotationProject
 )
 
@@ -43,6 +44,9 @@ fun ProjectSaver(viewModel: MainViewModel) {
         isOpen = saverData.isOpen,
         predefinedPath = saverData.filePath,
         onOpen = { viewModel.closeProjectSaver() },
+        onNewPath = {
+            viewModel.receiveNewProjectPath(it)
+        },
         project = viewModel.toProject()
     )
 }

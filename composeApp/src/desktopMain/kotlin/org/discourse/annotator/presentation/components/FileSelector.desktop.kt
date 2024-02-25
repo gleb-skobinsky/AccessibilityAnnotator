@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.awt.ComposeWindow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import org.discourse.annotator.domain.AnnotationProject
 import org.discourse.annotator.common.json.baseJson
@@ -43,6 +44,7 @@ actual fun FileSaver(
     isOpen: Boolean,
     predefinedPath: String?,
     onOpen: () -> Unit,
+    onNewPath: (String) -> Unit,
     project: AnnotationProject
 ) {
     LaunchedEffect(isOpen, predefinedPath) {
@@ -55,10 +57,10 @@ actual fun FileSaver(
                 fDialog.isVisible = true
                 fDialog.file?.let { file ->
                     fDialog.directory?.let { directory ->
-                        launch(Dispatchers.IO) {
+                        withContext(Dispatchers.IO) {
                             val path = Paths.get(directory, file)
-                            val newProject = project.copy(filePath = path.pathString)
-                            val textToWrite = baseJson.encodeToString(AnnotationProject.serializer(), newProject)
+                            onNewPath(path.pathString)
+                            val textToWrite = baseJson.encodeToString(AnnotationProject.serializer(), project.copy(filePath = path.pathString))
                             path.toFile().writeText(textToWrite)
                         }
                     }

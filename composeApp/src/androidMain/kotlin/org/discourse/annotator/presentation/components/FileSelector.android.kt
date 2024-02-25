@@ -47,6 +47,7 @@ actual fun FileSaver(
     isOpen: Boolean,
     predefinedPath: String?,
     onOpen: () -> Unit,
+    onNewPath: (String) -> Unit,
     project: AnnotationProject
 ) {
 
