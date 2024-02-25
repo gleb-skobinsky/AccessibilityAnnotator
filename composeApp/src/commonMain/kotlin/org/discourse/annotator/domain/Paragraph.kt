@@ -52,11 +52,10 @@ data class Paragraph(
         return null
     }
 
-    fun combineTwoSegments(segment1: Segment, segment2: Segment) {
-        val (forcing, forced) = listOf(segment1, segment2).sortedBy { it.startInParagraph }
-        val forcingId = forcing.entity?.id
+    fun combineTwoSegments(sourceSegment: Segment, targetSegment: Segment) {
+        val forcingId = sourceSegment.entity?.id
         forcingId?.let { entityId ->
-            val newForced = forced.copy(entity = forced.entity?.copyId(id = entityId))
+            val newForced = targetSegment.copy(entity = targetSegment.entity?.copyId(id = entityId))
             val targetIdx = segments.indexOfFirst { it.id == newForced.id }
             if (targetIdx != -1) {
                 segments[targetIdx] = newForced

@@ -1,9 +1,11 @@
 package org.discourse.annotator.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -30,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.discourse.annotator.common.uuid
@@ -45,43 +48,60 @@ import org.discourse.annotator.presentation.common.ParagraphColor
 import org.discourse.annotator.presentation.common.ParagraphTextStyle
 import org.discourse.annotator.presentation.common.VerticalSpacer
 
+
 @Composable
 fun Paragraphs(
     viewModel: MainViewModel,
     top: Dp,
     bottom: Dp
 ) {
+    val di = LocalDragInfo.current
     val selection by viewModel.selection.collectAsState()
     val modal by viewModel.selectionModal.collectAsState()
-    LazyColumn {
-        item { top.VerticalSpacer() }
-        items(
-            viewModel.paragraphs.size,
-            key = { viewModel.paragraphs[it].id },
-            contentType = { viewModel.paragraphs[it] }
-        ) { index ->
-            val paragraph = viewModel.paragraphs[index]
-            AnnotatedParagraph(
-                paragraph = paragraph,
-                selection = selection,
-                viewModel = viewModel,
-                index = index,
-                modal = modal
-            )
+    Box {
+        LazyColumn {
+            item { top.VerticalSpacer() }
+            items(
+                viewModel.paragraphs.size,
+                key = { viewModel.paragraphs[it].id },
+                contentType = { viewModel.paragraphs[it] }
+            ) { index ->
+                val paragraph = viewModel.paragraphs[index]
+                AnnotatedParagraph(
+                    paragraph = paragraph,
+                    selection = selection,
+                    viewModel = viewModel,
+                    index = index,
+                    modal = modal
+                )
+            }
+            item {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    FilledTonalIconButton(
+                        onClick = {
+                            viewModel.addParagraph()
+                        },
+                        shape = CircleShape
+                    ) {
+                        Icon(Icons.Outlined.Add, null)
+                    }
+                }
+            }
+            item { bottom.VerticalSpacer() }
         }
-        item {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                FilledTonalIconButton(
-                    onClick = {
-                        viewModel.addParagraph()
-                    },
-                    shape = CircleShape
-                ) {
-                    Icon(Icons.Outlined.Add, null)
+        di.draggedSegment?.let { segment ->
+            if (di.dragged) {
+                with(LocalDensity.current) {
+                    Text(
+                        text = segment.rawString,
+                        modifier = Modifier.offset(
+                            x = di.dragOffset.x.toDp(),
+                            y = di.dragOffset.y.toDp()
+                        )
+                    )
                 }
             }
         }
-        item { bottom.VerticalSpacer() }
     }
 }
 

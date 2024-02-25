@@ -220,9 +220,9 @@ class MainViewModel : BaseViewModel() {
         return paragraph?.findSegmentByIndex(charIndex)
     }
 
-    fun combineSegmentsIntoChain(paragraph: Int, segment1: Segment, segment2: Segment) {
+    fun combineSegmentsIntoChain(paragraph: Int, sourceSegment: Segment, targetSegment: Segment) {
         withParagraph(paragraph) { par ->
-            par.combineTwoSegments(segment1, segment2)
+            par.combineTwoSegments(sourceSegment, targetSegment)
             paragraphs[paragraph] = par.copy(id = uuid())
         }
     }
@@ -238,13 +238,6 @@ class MainViewModel : BaseViewModel() {
         paragraphs.removeAt(atIndex)
     }
 }
-
-data class ParagraphPosition(
-    val paragraph: Paragraph?,
-    val topInWindow: Float = 0f,
-    val bottomInWindow: Float = 0f,
-    val height: Int = 0
-)
 
 fun String.getEnd() = if (isEmpty()) 0 else length
 
