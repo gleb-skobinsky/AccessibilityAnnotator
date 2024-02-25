@@ -80,83 +80,89 @@ fun AnnotatedParagraph(
                 viewModel.deleteParagraph(index)
             }
             modal?.let {
-                DropdownMenu(
-                    expanded = true,
-                    onDismissRequest = {
-                        viewModel.cancelSelection()
-                    }
-                ) {
-                    DropdownHeader(it.step.label)
-                    when (val step = it.step) {
-                        is SelectionModalSteps.TypeSelection -> {
-                            DropdownMenuItem(
-                                text = { Text("Coreference") },
-                                onClick = {
-                                    viewModel.selectType(
-                                        DiscourseEntity.Coreference(id = uuid())
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Bridging") },
-                                onClick = {
-                                    viewModel.selectType(
-                                        DiscourseEntity.Bridging(id = uuid())
-                                    )
-                                }
-                            )
+                if (index == selection?.paragraph) {
+                    DropdownMenu(
+                        expanded = true,
+                        onDismissRequest = {
+                            viewModel.cancelSelection()
                         }
+                    ) {
+                        DropdownHeader(it.step.label)
+                        when (val step = it.step) {
+                            is SelectionModalSteps.TypeSelection -> {
+                                DropdownMenuItem(
+                                    text = { Text("Coreference") },
+                                    onClick = {
+                                        viewModel.selectType(
+                                            DiscourseEntity.Coreference(id = uuid())
+                                        )
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Bridging") },
+                                    onClick = {
+                                        viewModel.selectType(
+                                            DiscourseEntity.Bridging(id = uuid())
+                                        )
+                                    }
+                                )
+                            }
 
-                        is SelectionModalSteps.SubtypeSelection -> {
-                            when (step.parentType) {
-                                is DiscourseEntity.Coreference -> {
-                                    var referringType by remember { mutableStateOf(ReferringType.Unknown) }
-                                    var accessiblity by remember { mutableStateOf(AccessibilityLevel.Unknown) }
-                                    DropdownHeader("Select referring type")
-                                    for (ref in ReferringType.entries) {
-                                        if (ref == ReferringType.Unknown) continue
-                                        DropdownMenuItem(
-                                            text = { Text(ref.name) },
-                                            onClick = {
-                                                referringType = ref
-                                            }
-                                        )
-                                    }
-                                    DropdownHeader("Select accessiblity level")
-                                    for (acc in AccessibilityLevel.entries) {
-                                        if (acc == AccessibilityLevel.Unknown) continue
-                                        DropdownMenuItem(
-                                            text = { Text(acc.name) },
-                                            onClick = {
-                                                accessiblity = acc
-                                            }
-                                        )
-                                    }
-                                    LaunchedEffect(referringType, accessiblity) {
-                                        if (
-                                            referringType != ReferringType.Unknown
-                                            && accessiblity != AccessibilityLevel.Unknown
-                                        ) {
-                                            viewModel.selectSubtype(
-                                                referringType = referringType,
-                                                accessibilityLevel = accessiblity
+                            is SelectionModalSteps.SubtypeSelection -> {
+                                when (step.parentType) {
+                                    is DiscourseEntity.Coreference -> {
+                                        var referringType by remember { mutableStateOf(ReferringType.Unknown) }
+                                        var accessiblity by remember {
+                                            mutableStateOf(
+                                                AccessibilityLevel.Unknown
                                             )
-                                            referringType = ReferringType.Unknown
-                                            accessiblity = AccessibilityLevel.Unknown
+                                        }
+                                        DropdownHeader("Select referring type")
+                                        for (ref in ReferringType.entries) {
+                                            if (ref == ReferringType.Unknown) continue
+                                            DropdownMenuItem(
+                                                text = { Text(ref.name) },
+                                                onClick = {
+                                                    referringType = ref
+                                                }
+                                            )
+                                        }
+                                        DropdownHeader("Select accessiblity level")
+                                        for (acc in AccessibilityLevel.entries) {
+                                            if (acc == AccessibilityLevel.Unknown) continue
+                                            DropdownMenuItem(
+                                                text = { Text(acc.name) },
+                                                onClick = {
+                                                    accessiblity = acc
+                                                }
+                                            )
+                                        }
+                                        LaunchedEffect(referringType, accessiblity) {
+                                            if (
+                                                referringType != ReferringType.Unknown
+                                                && accessiblity != AccessibilityLevel.Unknown
+                                            ) {
+                                                viewModel.selectSubtype(
+                                                    referringType = referringType,
+                                                    accessibilityLevel = accessiblity
+                                                )
+                                                referringType = ReferringType.Unknown
+                                                accessiblity = AccessibilityLevel.Unknown
+                                            }
                                         }
                                     }
-                                }
 
-                                is DiscourseEntity.Bridging -> {
-                                    DropdownHeader("Select bridging type")
-                                    for (br in BridgingType.entries) {
-                                        if (br == BridgingType.Unknown) continue
-                                        DropdownMenuItem(
-                                            text = { Text(br.name) },
-                                            onClick = {
-                                                viewModel.selectSubtype(br)
-                                            }
-                                        )
+                                    is DiscourseEntity.Bridging -> {
+                                        DropdownHeader("Select bridging type")
+                                        for (br in BridgingType.entries) {
+                                            if (br == BridgingType.Unknown) continue
+                                            DropdownMenuItem(
+                                                text = { Text(br.name) },
+                                                onClick = {
+                                                    viewModel.selectSubtype(br)
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }

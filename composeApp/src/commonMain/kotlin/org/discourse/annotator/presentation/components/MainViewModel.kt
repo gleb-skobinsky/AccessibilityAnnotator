@@ -74,12 +74,12 @@ class MainViewModel : BaseViewModel() {
 
     fun acceptParagraphs(content: String) {
         vmLaunch {
-            /*val pars = content
+            val pars = content
                 .split("\n")
                 .filter { it.isNotBlank() }
-                .map { Paragraph(uuid(), mutableListOf(Segment(it, 0, it.length))) }*/
+                .map { it.toParagraph() }
             paragraphs.clear()
-            paragraphs.add(content.toParagraph())
+            paragraphs.addAll(pars)
         }
     }
 

@@ -18,7 +18,7 @@ data class Paragraph(
             }
         }
         selection?.let {
-            if (it.isEmpty() && it.paragraph != index) return@buildAnnotatedString
+            if (it.isEmpty() || it.paragraph != index) return@buildAnnotatedString
             val start = selection.startChar
             val end = selection.endChar
             when {
@@ -28,7 +28,10 @@ data class Paragraph(
                     minOf(start + 1, length)
                 )
 
-                start != null && end != null -> addStyle(selectionStyle, start, end)
+                start != null && end != null -> {
+                    if (end >= start) addStyle(selectionStyle, start, end)
+                }
+
                 start == null && end == null -> Unit
             }
         }
