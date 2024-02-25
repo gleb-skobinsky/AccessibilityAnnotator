@@ -36,9 +36,11 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.coroutines.core)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
+            implementation(libs.kotlinx.coroutines.swing)
         }
     }
 }

@@ -4,6 +4,8 @@ import androidx.compose.runtime.mutableStateListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 import org.discourse.annotator.common.uuid
 import org.discourse.annotator.domain.AccessibilityLevel
 import org.discourse.annotator.domain.AnnotationProject
@@ -18,6 +20,28 @@ import org.discourse.annotator.domain.SelectionRange
 import org.discourse.annotator.presentation.common.BaseViewModel
 
 class MainViewModel : BaseViewModel() {
+    private val _rawTextSelectorOpen = MutableStateFlow(false)
+    val rawTextSelectorOpen = _rawTextSelectorOpen.asStateFlow()
+
+    fun openRawTextSelector() {
+        _rawTextSelectorOpen.value = true
+    }
+
+    fun closeRawTextSelector() {
+        _rawTextSelectorOpen.value = false
+    }
+
+    private val _projectSelectorOpen = MutableStateFlow(false)
+    val projectSelectorOpen = _projectSelectorOpen.asStateFlow()
+
+    fun openProjectSelector() {
+        _projectSelectorOpen.value = true
+    }
+
+    fun closeProjectSelector() {
+        _projectSelectorOpen.value = false
+    }
+
     val paragraphs = mutableStateListOf<Paragraph>()
 
     private val _selection = MutableStateFlow<SelectionRange?>(null)
@@ -30,6 +54,29 @@ class MainViewModel : BaseViewModel() {
 
     fun setSelection(paragraph: Int, char: Int) {
         _selection.value = SelectionRange(paragraph, char)
+    }
+
+    fun acceptParagraphs(content: String) {
+        vmLaunch {
+            val pars = content
+                .split("\n")
+                .filter { it.isNotBlank() }
+                .map { Paragraph(uuid(), mutableListOf(Segment(it, 0, it.length))) }
+            paragraphs.clear()
+            paragraphs.addAll(pars)
+        }
+    }
+
+    fun acceptProject(content: String) {
+        vmLaunch {
+            try {
+                val project = Json.decodeFromString<AnnotationProject>(content)
+                paragraphs.clear()
+                paragraphs.addAll(project.paragraphs)
+            } catch (e: SerializationException) {
+                println("Failed to read project")
+            }
+        }
     }
 
     fun updateSelection(endChar: Int) {
