@@ -1,4 +1,4 @@
-package org.discourse.annotator.presentation.json
+package org.discourse.annotator.common.json
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule

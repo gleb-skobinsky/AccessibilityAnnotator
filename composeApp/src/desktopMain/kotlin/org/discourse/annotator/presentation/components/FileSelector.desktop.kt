@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import org.discourse.annotator.domain.AnnotationProject
-import org.discourse.annotator.presentation.json.baseJson
+import org.discourse.annotator.common.json.baseJson
 import java.awt.FileDialog
 import java.io.File
 import java.nio.file.Paths

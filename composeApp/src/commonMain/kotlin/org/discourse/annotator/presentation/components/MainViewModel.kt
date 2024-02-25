@@ -17,7 +17,7 @@ import org.discourse.annotator.domain.SelectionModal
 import org.discourse.annotator.domain.SelectionModalSteps
 import org.discourse.annotator.domain.SelectionRange
 import org.discourse.annotator.presentation.common.BaseViewModel
-import org.discourse.annotator.presentation.json.baseJson
+import org.discourse.annotator.common.json.baseJson
 
 data class ProjectSavingData(
     val isOpen: Boolean = false,
