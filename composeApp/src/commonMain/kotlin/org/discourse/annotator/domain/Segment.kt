@@ -78,7 +78,7 @@ data class Segment(
     }
 
     fun traverseFind(charIndex: Int): Segment? {
-        if (charIndex in startInParagraph..endInParagraph && entity != null) {
+        if (charIndex in startInParagraph..endInParagraph) {
             if (nested.isNotEmpty()) {
                 for (seg in nested) {
                     seg.traverseFind(charIndex)?.let { return it }

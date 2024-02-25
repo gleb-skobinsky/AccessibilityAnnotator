@@ -98,11 +98,11 @@ compose.desktop {
     }
 }
 
-/*
+
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions.freeCompilerArgs.addAll(
         "-P",
         "plugin:androidx.compose.compiler.plugins.kotlin:experimentalStrongSkipping=true",
     )
 }
-*/
+

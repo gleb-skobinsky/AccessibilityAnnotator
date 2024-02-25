@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.SerializationException
+import org.discourse.annotator.common.json.baseJson
 import org.discourse.annotator.common.uuid
 import org.discourse.annotator.domain.AccessibilityLevel
 import org.discourse.annotator.domain.AnnotationProject
@@ -17,7 +18,6 @@ import org.discourse.annotator.domain.SelectionModal
 import org.discourse.annotator.domain.SelectionModalSteps
 import org.discourse.annotator.domain.SelectionRange
 import org.discourse.annotator.presentation.common.BaseViewModel
-import org.discourse.annotator.common.json.baseJson
 
 data class ProjectSavingData(
     val isOpen: Boolean = false,
@@ -237,6 +237,13 @@ class MainViewModel : BaseViewModel() {
         paragraphs.removeAt(atIndex)
     }
 }
+
+data class ParagraphPosition(
+    val paragraph: Paragraph?,
+    val topInWindow: Float = 0f,
+    val bottomInWindow: Float = 0f,
+    val height: Int = 0
+)
 
 fun String.getEnd() = if (isEmpty()) 0 else length
 
