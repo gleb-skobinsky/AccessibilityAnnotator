@@ -7,6 +7,7 @@ import org.discourse.annotator.presentation.components.Paragraphs
 import org.discourse.annotator.presentation.components.ProjectFileSelector
 import org.discourse.annotator.presentation.components.ProjectSaver
 import org.discourse.annotator.presentation.components.RawTextFileSelector
+import org.discourse.annotator.presentation.components.StatsDialog
 import org.discourse.annotator.presentation.theme.AnnotatorAppTheme
 
 
@@ -29,4 +30,5 @@ fun App(viewModel: MainViewModel) {
     RawTextFileSelector(viewModel)
     ProjectFileSelector(viewModel)
     ProjectSaver(viewModel)
+    StatsDialog(viewModel)
 }

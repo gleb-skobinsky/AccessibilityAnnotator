@@ -4,6 +4,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.ImportExport
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +20,9 @@ fun AnnotatorTopBar(viewModel: MainViewModel) {
             }
         },
         actions = {
+            VectorIconButton(Icons.Outlined.Info) {
+                viewModel.showStats()
+            }
             VectorIconButton(Icons.Outlined.ImportExport) {
                 viewModel.openRawTextSelector()
             }

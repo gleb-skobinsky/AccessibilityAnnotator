@@ -17,6 +17,8 @@ import org.discourse.annotator.domain.Segment
 import org.discourse.annotator.domain.SelectionModal
 import org.discourse.annotator.domain.SelectionModalSteps
 import org.discourse.annotator.domain.SelectionRange
+import org.discourse.annotator.domain.stats.StatisticsCalculator
+import org.discourse.annotator.domain.stats.StatisticsPresenter
 import org.discourse.annotator.presentation.common.BaseViewModel
 
 data class ProjectSavingData(
@@ -236,6 +238,19 @@ class MainViewModel : BaseViewModel() {
 
     fun deleteParagraph(atIndex: Int) {
         paragraphs.removeAt(atIndex)
+    }
+
+    private val _statsPresenter = MutableStateFlow<StatisticsPresenter?>(null)
+    val statsPresenter = _statsPresenter.asStateFlow()
+
+    fun showStats() {
+        vmLaunch {
+            _statsPresenter.value = StatisticsCalculator(toProject()).calculate()
+        }
+    }
+
+    fun closeStats() {
+        _statsPresenter.value = null
     }
 }
 
