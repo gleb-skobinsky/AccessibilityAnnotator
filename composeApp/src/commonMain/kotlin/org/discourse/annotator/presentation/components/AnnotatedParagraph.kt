@@ -18,7 +18,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +41,8 @@ import org.discourse.annotator.domain.ReferringType
 import org.discourse.annotator.domain.SelectionModal
 import org.discourse.annotator.domain.SelectionModalSteps
 import org.discourse.annotator.domain.SelectionRange
+import org.discourse.annotator.presentation.common.ParagraphColor
+import org.discourse.annotator.presentation.common.ParagraphTextStyle
 import org.discourse.annotator.presentation.common.VerticalSpacer
 
 @Composable
@@ -102,13 +103,12 @@ fun AnnotatedParagraph(
             Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val color = MaterialTheme.colorScheme.onPrimaryContainer
             if (edited) {
                 BasicTextField(
                     value = editableField,
                     onValueChange = { editableField = it },
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = color),
-                    cursorBrush = SolidColor(color),
+                    textStyle = ParagraphTextStyle,
+                    cursorBrush = SolidColor(ParagraphColor),
                     modifier = Modifier.weight(1f)
                 )
             } else {

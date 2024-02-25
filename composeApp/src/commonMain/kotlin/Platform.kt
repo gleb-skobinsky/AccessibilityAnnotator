@@ -1,5 +1,6 @@
-interface Platform {
-    val name: String
+enum class Platform {
+    Android,
+    Desktop
 }
 
 expect fun getPlatform(): Platform

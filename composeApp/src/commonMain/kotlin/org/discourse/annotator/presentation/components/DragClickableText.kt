@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,6 +19,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import org.discourse.annotator.domain.Segment
 import org.discourse.annotator.domain.SelectionRange
+import org.discourse.annotator.presentation.common.ParagraphTextStyle
 
 @Composable
 fun RowScope.DragClickableText(
@@ -72,7 +72,7 @@ fun RowScope.DragClickableText(
         ) {
             ClickableText(
                 text = paragraphText,
-                style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onPrimaryContainer),
+                style = ParagraphTextStyle,
                 onTextLayout = {
                     textLayoutResult = it
                 },
