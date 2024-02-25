@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
 import org.discourse.annotator.common.uuid
 import org.discourse.annotator.domain.AccessibilityLevel
 import org.discourse.annotator.domain.AnnotationProject
@@ -18,6 +17,12 @@ import org.discourse.annotator.domain.SelectionModal
 import org.discourse.annotator.domain.SelectionModalSteps
 import org.discourse.annotator.domain.SelectionRange
 import org.discourse.annotator.presentation.common.BaseViewModel
+import org.discourse.annotator.presentation.json.baseJson
+
+data class ProjectSavingData(
+    val isOpen: Boolean = false,
+    val filePath: String? = null
+)
 
 class MainViewModel : BaseViewModel() {
     private val _rawTextSelectorOpen = MutableStateFlow(false)
@@ -42,6 +47,17 @@ class MainViewModel : BaseViewModel() {
         _projectSelectorOpen.value = false
     }
 
+    private val _projectSaverData = MutableStateFlow(ProjectSavingData())
+    val projectSaverData = _projectSaverData.asStateFlow()
+
+    fun openProjectSaver() {
+        _projectSaverData.update { it.copy(isOpen = true) }
+    }
+
+    fun closeProjectSaver() {
+        _projectSaverData.update { it.copy(isOpen = false) }
+    }
+
     val paragraphs = mutableStateListOf<Paragraph>()
 
     private val _selection = MutableStateFlow<SelectionRange?>(null)
@@ -58,20 +74,21 @@ class MainViewModel : BaseViewModel() {
 
     fun acceptParagraphs(content: String) {
         vmLaunch {
-            val pars = content
+            /*val pars = content
                 .split("\n")
                 .filter { it.isNotBlank() }
-                .map { Paragraph(uuid(), mutableListOf(Segment(it, 0, it.length))) }
+                .map { Paragraph(uuid(), mutableListOf(Segment(it, 0, it.length))) }*/
             paragraphs.clear()
-            paragraphs.addAll(pars)
+            paragraphs.add(content.toParagraph())
         }
     }
 
     fun acceptProject(content: String) {
         vmLaunch {
             try {
-                val project = Json.decodeFromString<AnnotationProject>(content)
+                val project = baseJson.decodeFromString(AnnotationProject.serializer(), content)
                 paragraphs.clear()
+                _projectSaverData.update { it.copy(filePath = project.filePath) }
                 paragraphs.addAll(project.paragraphs)
             } catch (e: SerializationException) {
                 println("Failed to read project")
@@ -125,7 +142,7 @@ class MainViewModel : BaseViewModel() {
         val oldSegment = currentSegment
         currentSegment = oldSegment?.copy(
             entity = (oldSegment.entity as? DiscourseEntity.Bridging)?.copy(
-                type = bridgingType
+                bridgingType = bridgingType
             )
         )
         insertSegment()
@@ -222,3 +239,5 @@ class MainViewModel : BaseViewModel() {
 }
 
 fun String.getEnd() = if (isEmpty()) 0 else length
+
+fun String.toParagraph() = Paragraph(uuid(), mutableListOf(Segment(rawString = this)))

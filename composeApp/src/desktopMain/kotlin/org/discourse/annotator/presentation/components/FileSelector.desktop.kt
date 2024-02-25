@@ -2,12 +2,16 @@ package org.discourse.annotator.presentation.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.awt.ComposeWindow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import org.discourse.annotator.domain.AnnotationProject
+import org.discourse.annotator.presentation.json.baseJson
 import java.awt.FileDialog
+import java.io.File
 import java.nio.file.Paths
+import kotlin.io.path.pathString
 
 @Composable
 actual fun FileSelector(
@@ -15,7 +19,6 @@ actual fun FileSelector(
     onOpen: () -> Unit,
     onTextRead: (String) -> Unit
 ) {
-    val fileReadScope = rememberCoroutineScope()
     LaunchedEffect(isOpen) {
         if (isOpen) {
             onOpen()
@@ -23,11 +26,41 @@ actual fun FileSelector(
             fDialog.isVisible = true
             fDialog.file?.let { file ->
                 fDialog.directory?.let { directory ->
-                    fileReadScope.launch(Dispatchers.IO) {
+                    launch(Dispatchers.IO) {
                         val inStream = Paths.get(directory, file).toFile().inputStream()
                         val text = inStream.readBytes().toString(Charsets.UTF_8)
                         inStream.close()
                         onTextRead(text)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+actual fun FileSaver(
+    isOpen: Boolean,
+    predefinedPath: String?,
+    onOpen: () -> Unit,
+    project: AnnotationProject
+) {
+    LaunchedEffect(isOpen, predefinedPath) {
+        predefinedPath?.let {
+            File(it).writeText(baseJson.encodeToString<AnnotationProject>(project))
+        } ?: run {
+            if (isOpen) {
+                onOpen()
+                val fDialog = FileDialog(ComposeWindow(), "Save the project", FileDialog.SAVE)
+                fDialog.isVisible = true
+                fDialog.file?.let { file ->
+                    fDialog.directory?.let { directory ->
+                        launch(Dispatchers.IO) {
+                            val path = Paths.get(directory, file)
+                            val newProject = project.copy(filePath = path.pathString)
+                            val textToWrite = baseJson.encodeToString(AnnotationProject.serializer(), newProject)
+                            path.toFile().writeText(textToWrite)
+                        }
                     }
                 }
             }

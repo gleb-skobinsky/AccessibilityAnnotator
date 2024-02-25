@@ -20,6 +20,7 @@ kotlin {
 
     sourceSets {
         val desktopMain by getting
+        val desktopTest by getting
 
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
@@ -41,6 +42,12 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+        desktopTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }

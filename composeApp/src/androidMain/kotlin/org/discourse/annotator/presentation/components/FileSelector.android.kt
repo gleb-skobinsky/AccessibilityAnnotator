@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.discourse.annotator.domain.AnnotationProject
 
 @Composable
 actual fun FileSelector(
@@ -39,4 +40,14 @@ actual fun FileSelector(
             )
         }
     }
+}
+
+@Composable
+actual fun FileSaver(
+    isOpen: Boolean,
+    predefinedPath: String?,
+    onOpen: () -> Unit,
+    project: AnnotationProject
+) {
+
 }

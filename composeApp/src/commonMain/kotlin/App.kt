@@ -18,6 +18,7 @@ import org.discourse.annotator.presentation.components.AnnotatedParagraph
 import org.discourse.annotator.presentation.components.AnnotatorTopBar
 import org.discourse.annotator.presentation.components.MainViewModel
 import org.discourse.annotator.presentation.components.ProjectFileSelector
+import org.discourse.annotator.presentation.components.ProjectSaver
 import org.discourse.annotator.presentation.components.RawTextFileSelector
 import org.discourse.annotator.presentation.theme.AnnotatorAppTheme
 
@@ -64,4 +65,5 @@ fun App(viewModel: MainViewModel) {
     }
     RawTextFileSelector(viewModel)
     ProjectFileSelector(viewModel)
+    ProjectSaver(viewModel)
 }

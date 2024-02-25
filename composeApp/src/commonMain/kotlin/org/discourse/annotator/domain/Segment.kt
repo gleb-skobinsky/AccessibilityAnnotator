@@ -9,8 +9,8 @@ import org.discourse.annotator.common.uuid
 @Serializable
 data class Segment(
     val rawString: String,
-    val startInParagraph: Int,
-    val endInParagraph: Int,
+    val startInParagraph: Int = 0,
+    val endInParagraph: Int = rawString.length,
     val id: String = uuid(),
     val entity: DiscourseEntity? = null,
     val nested: MutableList<Segment> = mutableListOf()

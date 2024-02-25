@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import kotlinx.serialization.Serializable
 import kotlin.math.absoluteValue
 
+@Serializable
 enum class BridgingType {
     Meronymy,
     MetalinguisticAnaphora,
@@ -16,15 +17,17 @@ enum class BridgingType {
 sealed interface DiscourseEntity {
     val id: String
 
+    @Serializable
     data class Coreference(
         override val id: String,
         val accessibility: AccessibilityLevel = AccessibilityLevel.Unknown,
         val referringType: ReferringType = ReferringType.Unknown
     ) : DiscourseEntity
 
+    @Serializable
     data class Bridging(
         override val id: String,
-        val type: BridgingType = BridgingType.Unknown
+        val bridgingType: BridgingType = BridgingType.Unknown
     ) : DiscourseEntity
 
     fun copyId(id: String): DiscourseEntity {

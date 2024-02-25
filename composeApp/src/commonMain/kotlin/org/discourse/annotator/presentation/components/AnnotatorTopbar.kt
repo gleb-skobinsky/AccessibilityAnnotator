@@ -22,7 +22,9 @@ fun AnnotatorTopBar(viewModel: MainViewModel) {
             VectorIconButton(Icons.Outlined.ImportExport) {
                 viewModel.openRawTextSelector()
             }
-            VectorIconButton(Icons.Outlined.Save)
+            VectorIconButton(Icons.Outlined.Save) {
+                viewModel.openProjectSaver()
+            }
         },
         backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
