@@ -92,6 +92,9 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            jvmArgs(
+                "-Dapple.awt.application.appearance=system"
+            )
             packageName = "org.discourse.annotator"
             packageVersion = "1.0.0"
         }
@@ -102,7 +105,7 @@ compose.desktop {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions.freeCompilerArgs.addAll(
         "-P",
-        "plugin:androidx.compose.compiler.plugins.kotlin:experimentalStrongSkipping=true",
+        "plugin:androidx.compose.compiler.plugins.kotlin:experimentalStrongSkipping=true"
     )
 }
 

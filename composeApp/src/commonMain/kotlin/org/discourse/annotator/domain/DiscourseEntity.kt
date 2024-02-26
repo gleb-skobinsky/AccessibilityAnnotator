@@ -13,6 +13,7 @@ enum class BridgingType {
     EntityRole,
     EventTime,
     SameSemanticField,
+    AntonymicPair,
     Unknown
 }
 
