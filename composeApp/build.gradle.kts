@@ -95,8 +95,9 @@ compose.desktop {
             jvmArgs(
                 "-Dapple.awt.application.appearance=system"
             )
-            packageName = "org.discourse.annotator"
+            packageName = "Discourse Annotator"
             packageVersion = "1.0.0"
+
         }
     }
 }

@@ -8,7 +8,7 @@ import org.discourse.annotator.presentation.components.MainViewModel
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
-        title = "AccessibilityAnnotator",
+        title = "Discourse Annotator",
         state = WindowState(WindowPlacement.Maximized)
     ) {
         App(remember { MainViewModel() })
