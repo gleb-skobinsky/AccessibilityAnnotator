@@ -1,6 +1,5 @@
 package org.discourse.annotator.domain.stats
 
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.discourse.annotator.domain.*
