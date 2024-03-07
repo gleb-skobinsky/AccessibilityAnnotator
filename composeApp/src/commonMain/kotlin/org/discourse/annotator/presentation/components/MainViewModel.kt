@@ -7,16 +7,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.serialization.SerializationException
 import org.discourse.annotator.common.json.baseJson
 import org.discourse.annotator.common.uuid
-import org.discourse.annotator.domain.AccessibilityLevel
-import org.discourse.annotator.domain.AnnotationProject
-import org.discourse.annotator.domain.BridgingType
-import org.discourse.annotator.domain.DiscourseEntity
-import org.discourse.annotator.domain.Paragraph
-import org.discourse.annotator.domain.ReferringType
-import org.discourse.annotator.domain.Segment
-import org.discourse.annotator.domain.SelectionModal
-import org.discourse.annotator.domain.SelectionModalSteps
-import org.discourse.annotator.domain.SelectionRange
+import org.discourse.annotator.domain.*
 import org.discourse.annotator.domain.stats.StatisticsCalculator
 import org.discourse.annotator.domain.stats.StatisticsPresenter
 import org.discourse.annotator.presentation.common.BaseViewModel
@@ -27,6 +18,17 @@ data class ProjectSavingData(
 )
 
 class MainViewModel : BaseViewModel() {
+    private val _darkTheme = MutableStateFlow(false)
+    val darkTheme = _darkTheme.asStateFlow()
+
+    fun initTheme(value: Boolean) {
+        _darkTheme.value = value
+    }
+
+    fun toggleTheme() {
+        _darkTheme.update { !it }
+    }
+
     private val _rawTextSelectorOpen = MutableStateFlow(false)
     val rawTextSelectorOpen = _rawTextSelectorOpen.asStateFlow()
 

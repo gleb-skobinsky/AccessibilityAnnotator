@@ -1,22 +1,25 @@
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import org.discourse.annotator.presentation.components.AnnotatorTopBar
-import org.discourse.annotator.presentation.components.MainViewModel
-import org.discourse.annotator.presentation.components.Paragraphs
-import org.discourse.annotator.presentation.components.ProjectFileSelector
-import org.discourse.annotator.presentation.components.ProjectSaver
-import org.discourse.annotator.presentation.components.RawTextFileSelector
-import org.discourse.annotator.presentation.components.StatsDialog
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import org.discourse.annotator.presentation.components.*
 import org.discourse.annotator.presentation.theme.AnnotatorAppTheme
 
 
 @Composable
 fun App(viewModel: MainViewModel) {
-    AnnotatorAppTheme(false) {
+    val sysDark = isSystemInDarkTheme()
+    LaunchedEffect(Unit) {
+        viewModel.initTheme(sysDark)
+    }
+    val theme by viewModel.darkTheme.collectAsState()
+    AnnotatorAppTheme(theme) {
         Scaffold(
             topBar = {
-                AnnotatorTopBar(viewModel)
+                AnnotatorTopBar(viewModel, theme)
             },
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ) { paddings ->

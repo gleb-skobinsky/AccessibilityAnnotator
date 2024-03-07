@@ -7,11 +7,14 @@ import androidx.compose.material.icons.outlined.ImportExport
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+import org.discourse.annotator.presentation.common.HorizontalSpacer
 
 @Composable
-fun AnnotatorTopBar(viewModel: MainViewModel) {
+fun AnnotatorTopBar(viewModel: MainViewModel, darkTheme: Boolean) {
     TopAppBar(
         title = { Text("Annotate", color = MaterialTheme.colorScheme.onPrimaryContainer) },
         navigationIcon = {
@@ -20,6 +23,8 @@ fun AnnotatorTopBar(viewModel: MainViewModel) {
             }
         },
         actions = {
+            Switch(darkTheme, { viewModel.toggleTheme() })
+            12.dp.HorizontalSpacer()
             VectorIconButton(Icons.Outlined.Info) {
                 viewModel.showStats()
             }
