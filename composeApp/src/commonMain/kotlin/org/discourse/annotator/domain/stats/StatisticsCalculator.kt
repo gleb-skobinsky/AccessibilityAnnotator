@@ -118,5 +118,8 @@ private fun List<Paragraph>.extractParts(): List<List<Paragraph>> {
             aggregator = aggregator + listOf(paragraph)
         }
     }
+    for (part in result.map { it.joinToString { it.segments.joinToString { it.rawString } } }) {
+        println(part)
+    }
     return result
 }

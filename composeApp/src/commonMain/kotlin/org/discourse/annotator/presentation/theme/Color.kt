@@ -3,9 +3,9 @@ package org.discourse.annotator.presentation.theme
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF004CA9)
-val onPrimaryLight = Color(0xFFFFFFFF)
+val onPrimaryLight = Color(0xFF181B24)
 val primaryContainerLight = Color(0xFF006FF0)
-val onPrimaryContainerLight = Color(0xFFFFFFFF)
+val onPrimaryContainerLight = Color(0xFF000000)
 val secondaryLight = Color(0xFF405D98)
 val onSecondaryLight = Color(0xFFFFFFFF)
 val secondaryContainerLight = Color(0xFFAEC6FF)

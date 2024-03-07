@@ -13,7 +13,7 @@ import org.discourse.annotator.presentation.theme.AnnotatorAppTheme
 
 @Composable
 fun App(viewModel: MainViewModel) {
-    AnnotatorAppTheme(true) {
+    AnnotatorAppTheme(false) {
         Scaffold(
             topBar = {
                 AnnotatorTopBar(viewModel)
