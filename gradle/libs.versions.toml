@@ -14,6 +14,7 @@ compose = "1.6.1"
 compose-plugin = "1.6.0-rc02"
 coroutines = "1.8.0"
 junit = "4.13.2"
+koalaplotCore = "0.5.2"
 kotlin = "1.9.22"
 lifecycle = "2.7.0"
 serializationLib = "1.6.3"
@@ -21,6 +22,7 @@ serializationLib = "1.6.3"
 [libraries]
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+koalaplot-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = "koalaplotCore" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

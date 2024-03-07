@@ -32,6 +32,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.koalaplot.core)
         }
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
